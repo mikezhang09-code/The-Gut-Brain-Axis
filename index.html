@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Gut-Brain Axis — An Interactive Map</title>
+  <meta name="description" content="Explore three pathways connecting your gut and brain — vagal, circulatory, and immune — animated at real relative speeds with published science.">
+
+  <!-- Fonts -->
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+  <!-- GSAP -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/DrawSVGPlugin.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link rel="stylesheet" href="./base.css">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./translations.js"></script>
+</head>
+<body>
+
+<!-- Ambient background -->
+<div class="ambient-bg" aria-hidden="true">
+  <div class="ambient-orb vagal"></div>
+  <div class="ambient-orb circ"></div>
+  <div class="ambient-orb immune"></div>
+</div>
+
+<!-- Nav dots -->
+<nav class="nav-dots" aria-label="Section navigation">
+  <button class="nav-dot active" data-section="hero" aria-label="Introduction" data-i18n-aria="nav.intro"></button>
+  <button class="nav-dot" data-section="bodymap" aria-label="Body Map" data-i18n-aria="nav.bodymap"></button>
+  <button class="nav-dot" data-section="timeline" aria-label="Timeline" data-i18n-aria="nav.timeline"></button>
+  <button class="nav-dot" data-section="deepdive" aria-label="Deep Dives" data-i18n-aria="nav.deepdive"></button>
+  <button class="nav-dot" data-section="personal" aria-label="Make It Yours" data-i18n-aria="nav.personal"></button>
+</nav>
+
+<button class="lang-toggle" id="lang-toggle" aria-label="Toggle Language">
+  <span class="lang-en active">EN</span> <span class="lang-sep">/</span> <span class="lang-zh">中文</span>
+</button>
+
+<div class="app">
+
+  <!-- ==================== HERO ==================== -->
+  <section class="hero" id="hero">
+    <div class="hero__bg">
+      <img src="./assets/hero-gutbrain.jpg" alt="" loading="eager">
+      <div class="hero__bg-overlay"></div>
+    </div>
+    <span class="hero__label" data-i18n="hero.label">The Gut-Brain Axis</span>
+    <h1 class="hero__title" data-i18n="hero.title">Listen to Your<br>Gut</h1>
+    <p class="hero__subtitle" data-i18n="hero.subtitle">What you eat, how you stress, and the trillions of microbes inside you are sending signals to your brain right now — through three pathways running at wildly different speeds. This is your body's conversation. Learn to read it.</p>
+    <a href="#bodymap" class="hero__cta">
+      <span data-i18n="hero.cta">Explore the Map</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </a>
+    <div class="hero__scroll-hint">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.55">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ==================== BODY MAP ==================== -->
+  <section class="bodymap-section section" id="bodymap">
+    <div class="bodymap-container">
+
+      <!-- LEFT: Legend -->
+      <div class="bodymap-legend">
+        <div class="legend-card legend-card--vagal" data-pathway="vagal">
+          <div class="legend-card__label">
+            <span class="legend-dot legend-dot--vagal"></span>
+            <span style="color:var(--color-vagal)" data-i18n="bodymap.vagal">Vagal Pathway</span>
+          </div>
+          <div class="legend-card__speed" data-i18n="bodymap.vagal_speed">Milliseconds — near-instant</div>
+          <div class="legend-card__desc" data-i18n="bodymap.vagal_desc">Neuropod cells and EC cell serotonin signal directly via the vagus nerve.</div>
+        </div>
+
+        <div class="legend-card legend-card--circ" data-pathway="circulatory">
+          <div class="legend-card__label">
+            <span class="legend-dot legend-dot--circ"></span>
+            <span style="color:var(--color-circulatory)" data-i18n="bodymap.circulatory">Circulatory Pathway</span>
+          </div>
+          <div class="legend-card__speed" data-i18n="bodymap.circ_speed">Minutes to hours</div>
+          <div class="legend-card__desc" data-i18n="bodymap.circ_desc">SCFAs enter the bloodstream and cross the blood-brain barrier via MCT transporters.</div>
+        </div>
+
+        <div class="legend-card legend-card--immune" data-pathway="immune">
+          <div class="legend-card__label">
+            <span class="legend-dot legend-dot--immune"></span>
+            <span style="color:var(--color-immune)" data-i18n="bodymap.immune">Immune Pathway</span>
+          </div>
+          <div class="legend-card__speed" data-i18n="bodymap.immune_speed">Hours to days</div>
+          <div class="legend-card__desc" data-i18n="bodymap.immune_desc">Cytokines and inflammatory signals travel via the bloodstream and modulate brain function.</div>
+        </div>
+      </div>
+
+      <!-- CENTER: Body SVG -->
+      <div class="bodymap-svg-wrap" id="bodymap-svg">
+        <svg viewBox="0 0 300 660" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Glow filters -->
+            <filter id="glow-vagal" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="glow-circ" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="glow-immune" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+
+            <!-- Gradient for body silhouette -->
+            <linearGradient id="body-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#4a5580" stop-opacity="0.7"/>
+              <stop offset="100%" stop-color="#3a4568" stop-opacity="0.5"/>
+            </linearGradient>
+
+            <!-- Animated particle markers — vivid -->
+            <circle id="particle-vagal" r="5" fill="#00ffc6" filter="url(#glow-vagal)"/>
+            <circle id="particle-circ" r="4" fill="#ffb347" filter="url(#glow-circ)"/>
+            <circle id="particle-immune" r="3.5" fill="#ff4d6a" filter="url(#glow-immune)"/>
+          </defs>
+
+          <!-- Body silhouette — clean ghost shape -->
+          <g id="body-silhouette">
+            <ellipse cx="150" cy="62" rx="42" ry="50" fill="#1a2240" stroke="#2d3860" stroke-width="0.6" opacity="0.7"/>
+            <rect x="136" y="110" width="28" height="28" rx="8" fill="#1a2240" opacity="0.5"/>
+            <path d="M 92 140 Q 82 160 80 220 Q 78 300 87 380 Q 92 400 107 420 L 120 420 Q 130 402 140 420 L 160 420 Q 170 402 180 420 L 193 420 Q 208 400 213 380 Q 222 300 220 220 Q 218 160 208 140 Z"
+                  fill="#1a2240" stroke="#2d3860" stroke-width="0.6" opacity="0.7"/>
+            <path d="M 80 160 Q 52 200 42 260 Q 34 300 37 340" fill="none" stroke="#1a2240" stroke-width="14" stroke-linecap="round" opacity="0.5"/>
+            <path d="M 220 160 Q 248 200 258 260 Q 266 300 263 340" fill="none" stroke="#1a2240" stroke-width="14" stroke-linecap="round" opacity="0.5"/>
+            <path d="M 107 420 Q 102 480 97 540 Q 94 580 92 620" fill="none" stroke="#1a2240" stroke-width="18" stroke-linecap="round" opacity="0.5"/>
+            <path d="M 193 420 Q 198 480 203 540 Q 206 580 208 620" fill="none" stroke="#1a2240" stroke-width="18" stroke-linecap="round" opacity="0.5"/>
+          </g>
+
+          <!-- Brain glow zone -->
+          <g id="brain-region">
+            <ellipse cx="150" cy="55" rx="28" ry="26" fill="rgba(100,140,200,0.06)" stroke="rgba(255,255,255,0.08)" stroke-width="0.6"/>
+          </g>
+
+          <!-- Gut glow zone -->
+          <g id="gut-region">
+            <ellipse cx="142" cy="310" rx="38" ry="52" fill="rgba(100,140,200,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="0.6"/>
+          </g>
+
+          <!-- === PATHWAY 1: VAGAL (center, fast green) === -->
+          <g id="pathway-vagal">
+            <path id="vagal-path" class="pathway-line"
+                  d="M 150 335 Q 148 300 146 270 Q 144 240 143 210 Q 142 180 144 155 Q 146 135 148 115 Q 149 95 150 65"
+                  fill="none" stroke="var(--color-vagal)" stroke-width="2.5" stroke-linecap="round"
+                  opacity="0.9" filter="url(#glow-vagal)"/>
+            <use href="#particle-vagal" class="vagal-particle vagal-p1" x="-50" y="-50"/>
+            <use href="#particle-vagal" class="vagal-particle vagal-p2" x="-50" y="-50"/>
+            <use href="#particle-vagal" class="vagal-particle vagal-p3" x="-50" y="-50"/>
+          </g>
+
+          <!-- === PATHWAY 2: CIRCULATORY (left arc, gold) === -->
+          <g id="pathway-circulatory">
+            <path id="circ-path" class="pathway-line"
+                  d="M 135 350 Q 115 330 100 300 Q 88 265 90 230 Q 92 195 100 170 Q 110 148 125 125 Q 135 105 142 85 Q 146 72 148 62"
+                  fill="none" stroke="var(--color-circulatory)" stroke-width="2" stroke-linecap="round"
+                  opacity="0.75" filter="url(#glow-circ)"
+                  stroke-dasharray="6 4"/>
+            <use href="#particle-circ" class="circ-particle circ-p1" x="-50" y="-50"/>
+            <use href="#particle-circ" class="circ-particle circ-p2" x="-50" y="-50"/>
+          </g>
+
+          <!-- === PATHWAY 3: IMMUNE (right arc, red) === -->
+          <g id="pathway-immune">
+            <path id="immune-path" class="pathway-line"
+                  d="M 165 350 Q 185 330 200 300 Q 212 265 210 230 Q 208 195 200 170 Q 190 148 175 125 Q 165 105 158 85 Q 154 72 152 62"
+                  fill="none" stroke="var(--color-immune)" stroke-width="1.8" stroke-linecap="round"
+                  opacity="0.65" filter="url(#glow-immune)"
+                  stroke-dasharray="4 6"/>
+            <use href="#particle-immune" class="immune-particle immune-p1" x="-50" y="-50"/>
+          </g>
+
+          <!-- Labels — minimal -->
+          <g font-family="var(--font-body)" fill="var(--color-text-muted)">
+            <text x="150" y="18" text-anchor="middle" font-weight="600" fill="var(--color-text)" font-size="11" data-i18n="bodymap.svg_brain">Brain</text>
+            <text x="150" y="30" text-anchor="middle" font-size="7" opacity="0.4" data-i18n="bodymap.svg_brain_sub">NTS → DRN → Prefrontal Cortex</text>
+            <text x="150" y="390" text-anchor="middle" font-weight="600" fill="var(--color-text)" font-size="11" data-i18n="bodymap.svg_gut">Gut</text>
+            <text x="150" y="402" text-anchor="middle" font-size="7" opacity="0.4" data-i18n="bodymap.svg_gut_sub">EC cells · Microbiome · Neuropods</text>
+          </g>
+        </svg>
+
+        <!-- Hotspot buttons -->
+        <button class="hotspot hotspot--brain" data-region="brain" aria-label="Explore brain region">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round" style="margin:auto;display:block;margin-top:10px"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0 0 14"/></svg>
+        </button>
+        <button class="hotspot hotspot--vagus" data-region="vagus" aria-label="Explore vagus nerve">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-vagal)" stroke-width="2" stroke-linecap="round" style="margin:auto;display:block;margin-top:10px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </button>
+        <button class="hotspot hotspot--gut" data-region="gut" aria-label="Explore gut region">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-circulatory)" stroke-width="2" stroke-linecap="round" style="margin:auto;display:block;margin-top:10px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+
+      <!-- RIGHT: Detail panels -->
+      <div class="bodymap-detail">
+        <div class="detail-panel" id="detail-default">
+          <div class="detail-panel__title" data-i18n="bodymap.detail_default_title">Tap a region to explore</div>
+          <div class="detail-panel__body" data-i18n="bodymap.detail_default_body">Select any glowing region on the body map to learn how signals travel between gut and brain. Each pathway operates at dramatically different speeds.</div>
+        </div>
+
+        <div class="detail-panel" id="detail-brain" style="display:none">
+          <div class="detail-panel__title" data-i18n="bodymap.detail_brain_title">The Receiving End</div>
+          <div class="detail-panel__body" data-i18n="bodymap.detail_brain_body">
+            Gut signals arrive at the <strong>nucleus tractus solitarius (NTS)</strong> in the brainstem, which relays to the <strong>dorsal raphe nucleus</strong> (mood), <strong>locus coeruleus</strong> (alertness), and the <strong>amygdala, hippocampus, and prefrontal cortex</strong> — shaping emotions, memory, and decision-making.
+          </div>
+          <div class="detail-panel__cite" data-i18n="bodymap.detail_brain_cite">Correlation observed in published studies — not proof of direct causation in humans.</div>
+        </div>
+
+        <div class="detail-panel" id="detail-vagus" style="display:none">
+          <div class="detail-panel__title" data-i18n="bodymap.detail_vagus_title">The Vagus Highway</div>
+          <div class="detail-panel__body" data-i18n="bodymap.detail_vagus_body">
+            The longest cranial nerve, the <strong>vagus</strong>, carries signals at <strong>~1–18 m/s</strong> depending on fiber type (C-fibers to Aδ). Neuropod cells in the duodenum form <strong>direct glutamatergic synapses</strong> with vagal neurons, enabling millisecond neurotransmission — far faster than hormonal signaling. EC cells release <strong>serotonin via TPH1</strong>, activating vagal 5-HT3 receptors.
+          </div>
+          <div class="detail-panel__cite" data-i18n="bodymap.detail_vagus_cite">Kaelberer et al., Science 2018; Int J Mol Sci 2025 — neuropod synaptic transduction and EC-vagal serotonin.</div>
+        </div>
+
+        <div class="detail-panel" id="detail-gut" style="display:none">
+          <div class="detail-panel__title" data-i18n="bodymap.detail_gut_title">The Microbial Factory</div>
+          <div class="detail-panel__body" data-i18n="bodymap.detail_gut_body">
+            Your colon hosts trillions of bacteria that ferment dietary fiber into <strong>short-chain fatty acids (SCFAs)</strong> — acetate, propionate, and butyrate. These metabolites upregulate <strong>TPH1</strong> to boost serotonin production and enter the bloodstream, eventually crossing the blood-brain barrier via <strong>MCT transporters</strong> on brain endothelial cells.
+          </div>
+          <div class="detail-panel__cite" data-i18n="bodymap.detail_gut_cite">Int J Mol Sci 2023 (PMC10606032); Frontiers in Endocrinology 2020 — SCFA transport and BBB crossing.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== TIMELINE ==================== -->
+  <section class="timeline-section" id="timeline">
+    <!-- Food imagery background -->
+    <div class="timeline-food-bg">
+      <img src="./assets/food-fiber.jpg" alt="" class="timeline-food-img" data-food="fiber" loading="lazy">
+      <img src="./assets/food-fermented.jpg" alt="" class="timeline-food-img" data-food="fermented" loading="lazy">
+      <img src="./assets/food-junk.jpg" alt="" class="timeline-food-img" data-food="junk" loading="lazy">
+      <img src="./assets/food-healthy.jpg" alt="" class="timeline-food-img active" data-food="baseline" loading="lazy">
+      <img src="./assets/food-recovery.jpg" alt="" class="timeline-food-img" data-food="recovery" loading="lazy">
+      <div class="timeline-food-overlay"></div>
+    </div>
+
+    <div class="timeline-content">
+      <span class="section__label section__label--primary" data-i18n="timeline.label">Your 30-Day Story</span>
+      <h2 class="section__title" data-i18n="timeline.title">Watch the Lag</h2>
+      <p class="section__desc" data-i18n="timeline.desc">Drag the scrubber. The food behind you changes. Vagal signals fire in milliseconds, but downstream effects on mood take longer. SCFA levels shift over hours. Immune-inflammatory responses may not peak for 1–3 days. Watch the lag unfold.</p>
+      <div class="correlation-note" data-i18n="timeline.correlation">Simulated data for illustration. Correlations do not imply causation.</div>
+
+      <div class="timeline-viz">
+        <!-- Scrubber FIRST — the primary interaction -->
+        <div class="timeline-scrubber">
+          <div class="scrubber-header">
+            <div class="scrubber-day" id="scrubber-day-label">Day 1</div>
+            <div>
+              <div class="scrubber-event" id="scrubber-event-label">Baseline</div>
+              <div class="scrubber-food-label" id="scrubber-food-label">Standard mixed diet</div>
+            </div>
+          </div>
+          <input type="range" class="scrubber-range" id="timeline-scrubber" min="0" max="29" value="0" aria-label="Drag to scrub through 30 days">
+          <div class="scrubber-labels">
+            <span>Day 1</span>
+            <span>Day 10</span>
+            <span>Day 20</span>
+            <span>Day 30</span>
+          </div>
+          <div class="event-markers" id="event-markers"></div>
+        </div>
+
+        <!-- Real-time insight narrative -->
+        <div class="timeline-insight" id="timeline-insight">
+          <div class="timeline-insight__header" id="insight-header">
+            <span class="timeline-insight__icon" id="insight-icon" style="background:rgba(0,255,198,0.15);color:#00ffc6">&#9679;</span>
+            <span id="insight-label" style="color:#00ffc6">What This Means for You</span>
+          </div>
+          <div class="timeline-insight__body" id="insight-body">
+            Baseline. Your three pathways are in a resting state — vagal tone is moderate, SCFA production is steady, and inflammatory markers are low. This is your starting point.
+          </div>
+          <div class="timeline-insight__detail" id="insight-detail">
+            Drag the scrubber to see how diet and stress reshape these signals over time.
+          </div>
+        </div>
+
+        <!-- Pathway bars below scrubber -->
+        <div class="timeline-bars">
+          <div class="timeline-chart-row">
+            <div class="timeline-chart-label" style="color:var(--color-vagal)" data-i18n="timeline.bar_vagal">Vagal</div>
+            <div class="timeline-chart-bar-container">
+              <div class="timeline-chart-bar timeline-chart-bar--vagal" id="bar-vagal" style="width:50%"></div>
+            </div>
+          </div>
+          <div class="timeline-chart-row">
+            <div class="timeline-chart-label" style="color:var(--color-circulatory)" data-i18n="timeline.bar_circ">Circulatory</div>
+            <div class="timeline-chart-bar-container">
+              <div class="timeline-chart-bar timeline-chart-bar--circ" id="bar-circ" style="width:40%"></div>
+            </div>
+          </div>
+          <div class="timeline-chart-row">
+            <div class="timeline-chart-label" style="color:var(--color-immune)" data-i18n="timeline.bar_immune">Immune</div>
+            <div class="timeline-chart-bar-container">
+              <div class="timeline-chart-bar timeline-chart-bar--immune" id="bar-immune" style="width:30%"></div>
+            </div>
+          </div>
+          <div class="timeline-chart-row">
+            <div class="timeline-chart-label" style="color:var(--color-text-muted)" data-i18n="timeline.bar_mood">Mood</div>
+            <div class="timeline-chart-bar-container">
+              <div class="timeline-chart-bar" id="bar-mood" style="width:55%; background: linear-gradient(90deg, #7eb8ff, rgba(126,184,255,0.2))"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== DEEP DIVES ==================== -->
+  <section class="deepdive-section section" id="deepdive">
+    <div class="section__inner">
+      <span class="section__label section__label--primary" data-i18n="deepdives.label">Three Mechanisms</span>
+      <h2 class="section__title" data-i18n="deepdives.title">The Deep Dives</h2>
+      <p class="section__desc" data-i18n="deepdives.desc">Each pathway tells a different story about how your body's inner world reaches your brain. Tap to explore the science behind each one.</p>
+    </div>
+
+    <div class="deepdive-grid">
+
+      <!-- DEEP DIVE 1: Vagal -->
+      <div class="deepdive-card deepdive-card--vagal" data-deepdive="vagal">
+        <div class="deepdive-card__anim" id="dd-anim-vagal">
+          <canvas id="dd-canvas-vagal" width="400" height="160"></canvas>
+        </div>
+        <div class="deepdive-card__number" style="color:var(--color-vagal)" data-i18n="deepdives.vagal_num">01</div>
+        <div class="deepdive-card__title" data-i18n="deepdives.vagal_title">The Neuropod Express</div>
+        <div class="deepdive-card__body" data-i18n="deepdives.vagal_body">Neuropod cells form direct glutamatergic synapses with vagal neurons, transmitting nutrient signals to the brain in milliseconds. A second colonic neuropod circuit uses TLR5 to sense bacterial flagellin and release PYY to regulate feeding. EC cells amplify with serotonin via TPH1.</div>
+        <div class="deepdive-card__cite" data-i18n="deepdives.vagal_cite">Kaelberer et al., Science 2018; Bohórquez, Kaelberer et al., Nature 2025</div>
+        <div class="deepdive-card__cta">
+          <span data-i18n="deepdives.explore">Explore mechanism</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+
+      <!-- DEEP DIVE 2: Circulatory -->
+      <div class="deepdive-card deepdive-card--circ" data-deepdive="circulatory">
+        <div class="deepdive-card__anim" id="dd-anim-circ">
+          <canvas id="dd-canvas-circ" width="400" height="160"></canvas>
+        </div>
+        <div class="deepdive-card__number" style="color:var(--color-circulatory)" data-i18n="deepdives.circ_num">02</div>
+        <div class="deepdive-card__title" data-i18n="deepdives.circ_title">The Metabolite River</div>
+        <div class="deepdive-card__body" data-i18n="deepdives.circ_body">Gut bacteria ferment dietary fiber into SCFAs — acetate, propionate, and butyrate. These metabolites ride the bloodstream and cross the blood-brain barrier through MCT transporters on brain endothelial cells, influencing neuroinflammation and neurotransmitter levels.</div>
+        <div class="deepdive-card__cite" data-i18n="deepdives.circ_cite">J Neuroinflammation 2025; Frontiers in Endocrinology 2020</div>
+        <div class="deepdive-card__cta">
+          <span data-i18n="deepdives.explore">Explore mechanism</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+
+      <!-- DEEP DIVE 3: Immune -->
+      <div class="deepdive-card deepdive-card--immune" data-deepdive="immune">
+        <div class="deepdive-card__anim" id="dd-anim-immune">
+          <canvas id="dd-canvas-immune" width="400" height="160"></canvas>
+        </div>
+        <div class="deepdive-card__number" style="color:var(--color-immune)" data-i18n="deepdives.immune_num">03</div>
+        <div class="deepdive-card__title" data-i18n="deepdives.immune_title">The Slow Burn</div>
+        <div class="deepdive-card__body" data-i18n="deepdives.immune_body">When gut barrier integrity weakens — from stress, poor diet, or dysbiosis — bacterial components like LPS translocate into the bloodstream, triggering cytokine cascades (TNF-α, IL-6) that reach the brain over hours to days, associated with changes in mood and cognition.</div>
+        <div class="deepdive-card__cite" data-i18n="deepdives.immune_cite">Cell Reports Medicine 2025; Nature 2024</div>
+        <div class="deepdive-card__cta">
+          <span data-i18n="deepdives.explore">Explore mechanism</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MAKE IT YOURS ==================== -->
+  <section class="personal-section section" id="personal">
+    <div class="section__inner">
+      <span class="section__label section__label--primary" data-i18n="personal.label">This Becomes You</span>
+      <h2 class="section__title" data-i18n="personal.title">Your Body,<br>Your Signals</h2>
+      <p class="section__desc" data-i18n="personal.desc">Everything above is published science. But your vagal timing isn't average. Your immune lag is uniquely yours. Here's how this map starts learning your body.</p>
+
+      <div class="personal-steps">
+        <div class="personal-step">
+          <div class="personal-step__icon personal-step__icon--connect">
+            <i data-lucide="watch"></i>
+          </div>
+          <div class="personal-step__title" data-i18n="personal.step1_title">Connect Your Signals</div>
+          <div class="personal-step__body" data-i18n="personal.step1_body">Pair a wearable to stream heart rate variability, sleep quality, and stress markers — data the vagal pathway would love.</div>
+        </div>
+
+        <div class="personal-step">
+          <div class="personal-step__icon personal-step__icon--log">
+            <i data-lucide="pencil-line"></i>
+          </div>
+          <div class="personal-step__title" data-i18n="personal.step2_title">Log in 30 Seconds</div>
+          <div class="personal-step__body" data-i18n="personal.step2_body">A quick daily check-in: what you ate, how your gut feels, your mood. Two taps and a slider. The model starts learning your personal lag times.</div>
+        </div>
+
+        <div class="personal-step">
+          <div class="personal-step__icon personal-step__icon--learn">
+            <i data-lucide="sparkles"></i>
+          </div>
+          <div class="personal-step__title" data-i18n="personal.step3_title">Watch It Learn</div>
+          <div class="personal-step__body" data-i18n="personal.step3_body">Over days and weeks, the map brightens and dims based on your body's own data. Your patterns emerge — unique timing, sensitivities, and rhythms.</div>
+        </div>
+      </div>
+
+      <!-- Mock phone UI -->
+      <div class="personal-phone">
+        <div class="phone-header">
+          <div class="phone-header__title" data-i18n="personal.phone_title">Today's Log</div>
+          <div class="phone-header__time">9:14 AM</div>
+        </div>
+        <div class="phone-entry">
+          <div class="phone-entry__label" data-i18n="personal.p_fiber">Fiber intake</div>
+          <div class="phone-entry__value" style="color:var(--color-vagal)" data-i18n="personal.v_fiber">High</div>
+        </div>
+        <div class="phone-entry">
+          <div class="phone-entry__label" data-i18n="personal.p_gut">Gut comfort</div>
+          <div class="phone-entry__value" style="color:var(--color-circulatory)" data-i18n="personal.v_gut">7/10</div>
+        </div>
+        <div class="phone-entry">
+          <div class="phone-entry__label" data-i18n="personal.p_mood">Mood</div>
+          <div class="phone-entry__value" style="color:var(--color-primary)" data-i18n="personal.v_mood">Good</div>
+        </div>
+        <div class="phone-entry">
+          <div class="phone-entry__label" data-i18n="personal.p_sleep">Sleep (HRV)</div>
+          <div class="phone-entry__value" style="color:var(--color-text-muted)" data-i18n="personal.v_sleep">52ms</div>
+        </div>
+        <div class="phone-entry">
+          <div class="phone-entry__label" data-i18n="personal.p_stress">Stress</div>
+          <div class="phone-entry__value" style="color:var(--color-immune)" data-i18n="personal.v_stress">Low</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer">
+    <div class="footer__disclaimer" data-i18n="footer.disclaimer">
+      All scientific claims reference Tier 1 peer-reviewed publications. Correlational language is used throughout — observed associations do not establish direct causation in humans. This visualization is educational, not medical advice.
+    </div>
+    <div class="footer__sources">
+      <strong data-i18n="footer.sources">Key Sources:</strong><br>
+      <a href="https://pubmed.ncbi.nlm.nih.gov/30237325/" target="_blank" rel="noopener noreferrer">Kaelberer et al. — Neuropod gut-brain neural circuit (Science, 2018)</a> ·
+      <a href="https://pubmed.ncbi.nlm.nih.gov/40702192/" target="_blank" rel="noopener noreferrer">Bohórquez, Kaelberer et al. — Neurobiotic sense, flagellin/TLR5 (Nature, 2025)</a> ·
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11818468/" target="_blank" rel="noopener noreferrer">Vagus Nerve & Serotonin in the Gut-Brain Axis (Int J Mol Sci, 2025)</a> ·
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12093714/" target="_blank" rel="noopener noreferrer">SCFAs-Microglia Pathway (J Neuroinflammation, 2025)</a> ·
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11970326/" target="_blank" rel="noopener noreferrer">Gut Microbiota-Immune-Brain Axis (Cell Reports Medicine, 2025)</a> ·
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10606032/" target="_blank" rel="noopener noreferrer">SCFAs in Microbiota-Gut-Brain Communication (Int J Mol Sci, 2023)</a> ·
+      <a href="https://www.nature.com/articles/s41586-024-07469-y" target="_blank" rel="noopener noreferrer">Body-Brain Circuit for Inflammatory Responses (Nature, 2024)</a> ·
+      <a href="https://www.frontiersin.org/journals/endocrinology/articles/10.3389/fendo.2020.00025/full" target="_blank" rel="noopener noreferrer">SCFAs from Gut Microbiota in the Brain (Frontiers, 2020)</a>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ==================== MODAL ==================== -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-content" id="modal-content">
+    <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+    <div id="modal-body">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+</div>
+
+<script src="./app.js"></script>
+<script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script></body>
+</html>
