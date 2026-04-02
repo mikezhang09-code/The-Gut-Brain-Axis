@@ -527,6 +527,21 @@ function generateTimelineData() {
     else { diet = 90 + Math.random() * 10; event = i === 27 ? 'Meditation added' : (i < 29 ? 'Mind-gut practice' : 'Peak wellness'); eventKey = i === 27 ? 'ev_meditation' : (i < 29 ? 'ev_mind_gut' : 'ev_peak_wellness'); }
 
     // Stress patterns
+    if (i >= 10 && i < 14) stress = 70 + Math.random() * 15;
+    else if (i >= 22 && i < 24) stress = 50 + Math.random() * 10;
+    else stress = 15 + Math.random() * 15;
+
+    // Vagal: responds same day to diet/stress
+    const vagal = clamp(diet * 0.6 + (100 - stress) * 0.25 + Math.random() * 8, 10, 95);
+
+    // Circulatory: 1-day lag from diet (SCFAs take time)
+    const prevDiet = i > 0 ? getDietForDay(i - 1) : diet;
+    const circulatory = clamp(prevDiet * 0.55 + (100 - stress) * 0.15 + Math.random() * 10, 10, 90);
+
+    // Immune: 2-3 day lag, responds more to stress
+    const laggedDiet = i > 2 ? getDietForDay(i - 2) : diet;
+    const laggedStress = i > 2 ? getStressForDay(i - 2) : stress;
+    const immune = clamp(laggedDiet * 0.3 + (100 - laggedStress) * 0.4 + Math.random() * 12, 10, 85);
 
     // Mood: composite, lagged by ~1 day
     const mood = clamp(vagal * 0.35 + circulatory * 0.3 + immune * 0.25 + Math.random() * 8, 15, 92);
@@ -534,7 +549,7 @@ function generateTimelineData() {
     days.push({
       day: i + 1, diet: Math.round(diet), stress: Math.round(stress),
       vagal: Math.round(vagal), circulatory: Math.round(circulatory),
-      immune: Math.round(immune), mood: Math.round(mood), event
+      immune: Math.round(immune), mood: Math.round(mood), event, eventKey
     });
   }
   return days;
