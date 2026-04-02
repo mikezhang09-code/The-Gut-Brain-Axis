@@ -27,11 +27,17 @@ document.addEventListener('DOMContentLoaded', () => {
    ============================================ */
 
 function initLanguageSwitcher() {
-  const btnEn = document.getElementById('lang-en');
-  const btnZh = document.getElementById('lang-zh');
+  const btnEn = document.querySelector('.lang-en');
+  const btnZh = document.querySelector('.lang-zh');
+  const mainToggle = document.getElementById('lang-toggle');
 
-  if (btnEn) btnEn.addEventListener('click', () => setLanguage('en'));
-  if (btnZh) btnZh.addEventListener('click', () => setLanguage('zh'));
+  if (btnEn) btnEn.addEventListener('click', (e) => { e.stopPropagation(); setLanguage('en'); });
+  if (btnZh) btnZh.addEventListener('click', (e) => { e.stopPropagation(); setLanguage('zh'); });
+  if (mainToggle) {
+    mainToggle.addEventListener('click', () => {
+      setLanguage(window.currentLang === 'en' ? 'zh' : 'en');
+    });
+  }
 
   // Apply initial language
   setLanguage(window.currentLang);
@@ -43,8 +49,8 @@ function setLanguage(lang) {
   document.documentElement.setAttribute('lang', lang);
 
   // Update UI toggles
-  const btnEn = document.getElementById('lang-en');
-  const btnZh = document.getElementById('lang-zh');
+  const btnEn = document.querySelector('.lang-en');
+  const btnZh = document.querySelector('.lang-zh');
   if (btnEn) btnEn.classList.toggle('active', lang === 'en');
   if (btnZh) btnZh.classList.toggle('active', lang === 'zh');
 
